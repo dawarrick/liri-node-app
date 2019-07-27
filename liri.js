@@ -1,50 +1,65 @@
 //get the environment variable
 require("dotenv").config();
-//const inquirer = require('inquirer')
+
+//load up the includes
+const inquirer = require('inquirer')
 var keys = require("./keys.js");
 var Spotify = require('node-spotify-api');
 var axios = require("axios");
 var moment = require("moment");
 
-
+//store the spotify keys in the spotify object
 var spotify = new Spotify(keys.spotify);
+var results = [];
 
-//'All the Small Things' 
-//Spotify
-if (1 === 2) {
-    spotify.search({ type: 'track', query: 'The Hills are Alive' }, function (err, data) {
-        if (err) {
-            return console.log('Error occurred: ' + err);
-        }
+//Spotify if spotify-this-song is passed.
+//'The Sign' will be the default if spotify called with no song 
 
-        // console.log(data);  can be multiple of all.
-        console.log("Song Name: " + JSON.stringify(data.tracks.items[0].name))
-        console.log("Artist(s): " + JSON.stringify(data.tracks.items[0].album.artists[0].name))   //multiple
-        console.log("Preview Link: " + JSON.stringify(data.tracks.items[0].preview_url))
-        console.log("Album: " + JSON.stringify(data.tracks.items[0].album.name))
-    });
+var song = "yellow submarine";
+var i = 0;
+
+if (1 === 1) {
+    results = [];
+    spotify.search({ type: 'track', query: song, limit: 1 })
+        .then(function (response) {
+            response.tracks.items.forEach(function (ea) {
+                results.push({
+                    artist: ea.artists,
+                    song: ea.name,
+                    preview: ea.preview_url,
+                    album: ea.album.name
+                });
+            })
+            printSpotify();         //send to the console and add to log file
+        })
+        .catch(function (err) {
+            console.log(err);
+        });
 }
-//Bandsintown
 
-/*Name of the venue
-Venue location
-Date of the Event (use moment to format this as "MM/DD/YYYY")
-*/
+//concert-this will call Bandsintown.  It will default to Madonna if no value is passed.
 
-
-// Run the axios.get function...
-// The axios.get function takes in a URL and returns a promise (just like $.ajax)
 if (1 === 2) {
+    results = [];
     var artist = "Madonna";
     axios.get(`https://rest.bandsintown.com/artists/${artist}/events?app_id=codingbootcamp?date=upcoming`)
         .then(function (response) {
+            response.data.forEach(function (ea) {
+                results.push({
+                    venue: ea.venue.name,
+                    location: ea.venue.city + ', ' + ea.venue.region,
+                    date: convertDate(ea.datetime.substr(0, 10), 'YYYY-MM-DD', 'MM/DD/YYYY')
+                });
+            })
+            printBand();         //send to the console and add to log file
             // If the axios was successful...
             // Then log the body from the site!
-            console.log(response.data);
-            console.log("Name of Venue: " + JSON.stringify(data[0].venue.name))
-            console.log("Location: " + JSON.stringify(data[0].venue.city + ", " + data[0].venue.region))
-            console.log("Date of Event (MM/DD/YYYY): " + JSON.stringify(data[0].datetime))
-
+            //console.log(response.data);
+            /*           console.log("Name of Venue: " + JSON.stringify(response.data[0].venue.name));
+                       console.log("Location: " + JSON.stringify(response.data[0].venue.city + ", " + response.data[0].venue.region));
+                       console.log("Date of Event (MM/DD/YYYY): " + JSON.stringify(response.data[0].datetime));
+                       //console.log("substr "+JSON.stringify(response.data[0].datetime.substr(0,10)))
+                       var returnDate = convertDate(JSON.stringify(response.data[0].datetime.substr(0, 10)), 'YYYY-MM-DD','MM/DD/YYYY');*/
         })
         .catch(function (error) {
             if (error.response) {
@@ -64,33 +79,120 @@ if (1 === 2) {
             console.log(error.config);
         });
 }
-/* movie this
-    * Title of the movie.
-    * Year the movie came out.
-    * IMDB Rating of the movie.
-    * Rotten Tomatoes Rating of the movie.
-    * Country where the movie was produced.
-    * Language of the movie.
-    * Plot of the movie.
-    * Actors in the movie.
+/* movie-this will pull from the OMDB database
+    if no movie is passed, it will display for the movie 'Mr. Nobody'
 */
-var artist = "Madonna";
+var movie = "Mr. Nobody";
+if (1 === 2) {
+    results = [];
+    axios.get(`http://www.omdbapi.com/?t=${movie}&y=&plot=short&apikey=trilogy`).then(
+        function (response) {
+            //console.log(JSON.stringify(response.data));
+            /*            console.log("Title: " + JSON.stringify(response.data.Title))
+                        console.log("Year: " + JSON.stringify(response.data.Year))
+                        console.log("The movie's rating is: " + response.data.imdbRating);
+                        var i = response.data.Ratings.findIndex(i => i.Source === "Rotten Tomatoes")
+                        console.log(i)
+                        console.log("Rotten Tomatoes: " + response.data.Ratings[i].Value);
+                        console.log("Country: " + response.data.Country);
+                        console.log("Language: " + response.data.Language);
+                        console.log("Plot: " + response.data.Plot);
+                        console.log("Actors: " + response.data.Actors);*/
+            //load into a results array
+            response.data.forEach(function (ea) {
+                results.push({
+                    title: ea.Title,
+                    year: ea.year,
+                    imdbRating: ea.imdbRating,
+                    rottenRating: ea.Ratings[response.data.Ratings.findIndex(i => i.Source === "Rotten Tomatoes")].Value,
+                    country: ea.Country,
+                    language: ea.language,
+                    plot: ea.Plot,
+                    actors: ea.Actors
+                });
+            })
+            printMovie();         //send to the console and add to log file
 
-axios.get("http://www.omdbapi.com/?t=remember+the+titans&y=&plot=short&apikey=trilogy").then(
-    function (response) {
-        console.log(JSON.stringify(response.data));
-        console.log("Title: " + JSON.stringify(response.data.Title))
-        console.log("Year: " + JSON.stringify(response.data.Year))
-        console.log("The movie's rating is: " + response.data.imdbRating);
-        var i = response.data.Ratings.findIndex(i => i.Source === "Rotten Tomatoes")
-        console.log(i)
-        console.log("Rotten Tomatoes: " + response.data.Ratings[i].Value);
-        console.log("Country: " + response.data.Country);
-        console.log("Language: " + response.data.Language);
-        console.log("Plot: " + response.data.Plot);
-        console.log("Actors: " + response.data.Actors);
+            /*          console.log("Title: " + JSON.stringify(response.data.Title))
+                      console.log("Year: " + JSON.stringify(response.data.Year))
+                      console.log("The movie's rating is: " + response.data.imdbRating);
+                      var i = response.data.Ratings.findIndex(i => i.Source === "Rotten Tomatoes")
+                      console.log(i)
+                      console.log("Rotten Tomatoes: " + response.data.Ratings[i].Value);
+                      console.log("Country: " + response.data.Country);
+                      console.log("Language: " + response.data.Language);
+                      console.log("Plot: " + response.data.Plot);
+                      console.log("Actors: " + response.data.Actors)*/
+        }
+    );
+}
+
+
+function printSpotify() {
+    for (var i = 0; i < results.length; i++) {
+        //need to loop through the artists because there can be multiple
+        var artists = "";
+        for (var j = 0; j < results[i].artist.length; j++) {
+            if (artists === "") {
+                artists = results[i].artist[j].name;
+            }
+            else {
+                artists = artists + ',' + results[i].artist[j].name;
+            }
+        }
+        var previewURL = "";
+        if (results[i].preview === null) {
+            previewURL = 'N/A';
+        } else {
+            previewURL = results[i].preview;
+        }
+        console.log("Song Name: " + results[i].song)
+        console.log("Artist(s): " + artists)   //multiple
+        console.log("Preview Link: " + previewURL)
+        console.log("Album: " + results[i].album)
+
     }
-);
+}
+
+function printBand() {
+    for (var i = 0; i < results.length; i++) {
+        //need to loop through the artists because there can be multiple
+ 
+        console.log("Venue: " + results[i].venue)
+        console.log("Location: " + results[i].location)
+        console.log("Date: " + results[i].date)
+    }
+}
+
+
+function printMovie() {
+    for (var i = 0; i < results.length; i++) {
+        //need to loop through the artists because there can be multiple
+ 
+        console.log("Title: " + results[i].title)
+        console.log("Year: " + results[i].year)
+        console.log("IMDB Rating: " + results[i].imdbrating)
+        console.log("Rotten Tomatoes: " + results[i].rottenRating)
+        console.log("Country: " + results[i].country)
+        console.log("Language: " + results[i].language)
+        console.log("Plot: " + results[i].plot)
+        console.log("Actors: " + results[i].actors)
+    }
+}
+
+/*function writeToFile(writeData) {
+    // Append showData and the divider to log.txt, print showData to the console
+    fs.appendFile("log.txt", writeData + divider, function (err) {
+        if (err) throw err;
+        console.log(showData);
+    });
+}*/
+
+
+//this will convert a date from the format it is currently in to the desired return format
+function convertDate(dateIn, dateFormatIn, dateFormatOut) {
+    return convertedDate = moment(dateIn, dateFormatIn).format(dateFormatOut);
+};
 
 //var found = arr.filter(function(item) { return item.name === 'k1'; });
 //Source":"Rotten Tomatoes","Value":"73%"
