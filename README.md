@@ -1,9 +1,11 @@
-# liri.js - Developed by Deb Warrick
+# liri.js - Who needs Siri when you can have Liri!
 
-**Liri** is a Nodejs app that will allow you to retrieve information from the Spotify, BandsinTown, and OMDB APIs based on user input
+Developed by Deb Warrick https://debwarrick.com
 
-Liri can't be run from a URL, it must be executed using Nodejs
+**Liri** 
+It is a Nodejs app that will allow you to retrieve information from the Spotify, BandsinTown, and OMDB APIs based on your user input.
 
+Liri can't be run from a URL, it must be executed using Nodejs.
 
 ## How it works
 
@@ -21,21 +23,21 @@ node liri movie-this Gone with the Wind
 node liri do-what-it-says
 
 
-### Additional features
-#### The entries are case insensitive
+### Additional Features
+
+#### All entries are case insensitive
 
 #### Can't remember the commands?  No Problem! 
 
-##### node liri without any criteria will prompt you to select from a list.
+Node liri without any criteria will prompt you to select from a list.
+It will only prompt for the "selection criteria" if the command allows for that.
 
-It will only prompt for selection criteria if the command allows for that.
+#### Each time you successfully run the app, your entry will be added to the random selection list.
+This will be used for future selection by the do-what-it-says option, allowing you to create your own random playlist.
 
-#### Each time you successfully run the app, your entry will be added to the random log for future selection
+## Technical requirements
 
-
-## Design
-
-**liri** uses the following nodejs libraries
+**liri** uses the following nodejs libraries that you must install.
 
 inquirer - to allow for the prompts for the execution
 keys - API keys are stored in a .env file to protect them
@@ -43,3 +45,7 @@ node-spotify-api - for calls to the Spotify API
 axios - for API calls to BandsinTown API and the OMDB API
 moment - for date conversion
 fs - for file I/O
+
+You must have valid Spotify credentials loaded into a .env file in order to run it.
+
+## Thank you for checking it out, and have fun!

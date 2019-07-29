@@ -9,15 +9,17 @@ var axios = require("axios");
 var moment = require("moment");
 var fs = require("fs");
 
-//store the spotify keys in the spotify object
+//store the spotify keys in the spotify object for verification
 var spotify = new Spotify(keys.spotify);
-var results = [];
-var command = "";
+var results = [];   //will store the results from all three queries
+var command = "";   //action they wish to perform.
+var crlf = '\r\n';  //carriage return for file i/o new line
 
 //these are the valid commands they can run
 var validCommand = ["concert-this", "spotify-this-song", "movie-this", "do-what-it-says"];
 
 //get command line parameters
+
 //this should be the action the user wants to perform
 if (process.argv[2] !== undefined) {
     command = process.argv[2].toLowerCase();
@@ -27,32 +29,46 @@ if (process.argv[2] !== undefined) {
 var searchCriteria = process.argv.splice(3).join(" ");
 
 //separate screen displays
-var divider = `\r\n*--------------------------------------------------------------------------------------------------------*\r\n`
+var divider = `${crlf}*--------------------------------------------------------------------------------------------------------*${crlf}`
 
 //Spotify if spotify-this-song is passed.
 function spotifyCall() {
 
     //'The Sign' will be the default if spotify called with no song 
     if (searchCriteria === "" || searchCriteria === null || searchCriteria === undefined) {
-        searchCriteria = "The Sign";
+        searchCriteria = "Ace of Base The Sign";
     }
     results = [];
-    spotify.search({ type: 'track', query: searchCriteria, limit: 1 })
+    //going to limit it to 10 responses
+    spotify.search({ type: 'track', query: searchCriteria, limit: 10 })
         .then(function (response) {
-            response.tracks.items.forEach(function (ea) {
-                results.push({
-                    artist: ea.artists,
-                    song: ea.name,
-                    preview: ea.preview_url,
-                    album: ea.album.name
-                });
-            })
            
+            response.tracks.items.forEach(function (ea) {
+                var song = ea.name;
+                var preview = ea.preview_url;
+                var album = ea.album.name;
+                //need to pull out the artists as there can be multiple.
+                var allArtists = ""; 
+                for (var i = 0; i < ea.artists.length; i++) {
+                    if (allArtists !== "") {
+                        allArtists = allArtists + ", ";
+                    }
+                    allArtists = allArtists + ea.artists[i].name;
+                }
+
+                results.push({
+                    artist: allArtists,
+                    song: song,
+                    preview: preview,
+                    album: album
+                });
+            });
+
             if (results.length === 0) {
                 noResults()
             }
             else {
-                printSpotify();         //send to the console
+                printResults();         //send to the console
                 writeToRandom();        //add to text file of commands
             }
         })
@@ -61,9 +77,7 @@ function spotifyCall() {
         });
 }
 
-
 //concert-this will call Bandsintown.  It will default to "Maroon 5" if no value is passed.
-
 function concert() {
 
     results = [];
@@ -73,7 +87,7 @@ function concert() {
     }
     axios.get(`https://rest.bandsintown.com/artists/${searchCriteria}/events?app_id=codingbootcamp?date=upcoming`)
         .then(function (response) {
-
+            //load everything into an array for processing
             response.data.forEach(function (ea) {
                 results.push({
                     venue: ea.venue.name,
@@ -86,7 +100,7 @@ function concert() {
                 noResults()
             }
             else {
-                printConcert();         //send to the console
+                printResults();         //send to the console and log file
                 writeToRandom();        //add to text file of commands
             }
         })
@@ -114,7 +128,7 @@ function movie() {
                 rottenRating1 = response.data.Ratings[response.data.Ratings.findIndex(i => i.Source === "Rotten Tomatoes")].Value
             }
 
-            console.log("response title " + response.data.Title)
+            //load everything into an array for processing.
             results.push({
                 title: response.data.Title,
                 year: response.data.year,
@@ -125,12 +139,13 @@ function movie() {
                 plot: response.data.Plot,
                 actors: response.data.Actors
             });
+
             if (results.length === 0) {
                 console.log("no results")
                 noResults()
             }
             else {
-                printMovie();         //send to the console
+                printResults();         //send to the console and log file
                 writeToRandom();      //add to text file of commands
             }
         })
@@ -141,7 +156,7 @@ function movie() {
 };
 
 
-//if the user want the program to select, will select a randomly from random.txt and call the process in the table
+//if the user want the program to select, will select randomly from random.txt and call the process in the table
 function doRandom() {
 
     // load an array of the values from previously select list (random.txt)
@@ -169,7 +184,6 @@ function doRandom() {
         searchCriteria = newData[i + 1].replace(regex, "");
         //now execute the selected command
         processCommand();
-
     });
 
 }
@@ -179,88 +193,57 @@ function getIndex(arrayLength) {
     return Math.floor(Math.random() * (arrayLength - 1));
 }
 
-//print to screen Spotify information
-//I have limited return to 1, but am leaving the functionality to show multiple in case wanted in the future.
-function printSpotify() {
+//print results to screen and to the logfile.txt
+function printResults() {
+    //display the selection made
+    console.log(`${crlf}******${command}: ${searchCriteria}******`);
+    var printString = `${crlf}******${command}: ${searchCriteria}******$`;
+    //loop through the results
     for (var i = 0; i < results.length; i++) {
-        //need to loop through the artists because there can be multiple
-        var artists = "";
-        console.log(divider)
-        for (var j = 0; j < results[i].artist.length; j++) {
-            if (artists === "") {
-                artists = results[i].artist[j].name;
-            }
-            else {
-                artists = artists + ',' + results[i].artist[j].name;
-            }
+        console.log(divider);
+        printString += divider;
+        object = results[i];
+        //this will loop through the properties in the array and spit out the propery and the value.
+        for (var property in object) {
+            console.log(`${property}: ${results[i][property]}`)
+            printString += `${property}: ${results[i][property]}${crlf}`;
         }
-        var previewURL = "";
-        if (results[i].preview === null) {
-            previewURL = 'N/A';
-        } else {
-            previewURL = results[i].preview;
-        }
-        console.log("Song Name: " + results[i].song)
-        console.log("Artist(s): " + artists)   //multiple
-        console.log("Preview Link: " + previewURL)
-        console.log("Album: " + results[i].album)
-        console.log(divider)
     }
-
+    printString += divider;
+    console.log(divider);
+    //send the output to the log file too.
+    writeToLog(`log.txt`, printString);
 }
 
-//print to screen the concerr 
-function printConcert() {
-    //need to loop through the concerts because there can be multiple
-    for (var i = 0; i < results.length; i++) {
-        console.log(divider)
-        console.log("Band: " + searchCriteria);
-        console.log("Venue: " + results[i].venue)
-        console.log("Location: " + results[i].location)
-        console.log("Date: " + results[i].date)
-    }
-    console.log(divider)
-}
-
-//print to screen the movie information
-function printMovie() {
-    //need to loop through the movies because there can be multiple
-    for (var i = 0; i < results.length; i++) {
-        console.log(divider)
-        console.log("Title: " + results[i].title)
-        console.log("Year: " + results[i].year)
-        console.log("IMDB Rating: " + results[i].imdbrating)
-        console.log("Rotten Tomatoes: " + results[i].rottenRating)
-        console.log("Country: " + results[i].country)
-        console.log("Language: " + results[i].language)
-        console.log("Plot: " + results[i].plot)
-        console.log("Actors: " + results[i].actors)
-        console.log(divider)
-    }
-
-}
 
 //if nothing was found that matches, let them know
 function noResults() {
+    var wording = `No criteria was found that matched your search ${command}: "${searchCriteria}", please try again`
     console.log(divider);
-    console.log(`No criteria was found that matched your search "${searchCriteria}", please try again`)
+    console.log(wording)
     console.log(divider);
+    var printString = divider + wording + divider;
+    writeToLog(`log.txt`, printString);
 }
 
+// Append the command and the searchCriteria of successful actions to random.txt
 function writeToRandom() {
-    // Append the command and the searchCriteria of successful actions to random.txt
-    fs.appendFile('random.txt', command + ',' + '"' + searchCriteria + '"' + '\r\n', function (err) {
+    writeToLog(`random.txt`, `${command}, "${searchCriteria}"${crlf}`)
+}
+
+// Append the screen output to the log.txt
+function writeToLog(fileName, writeLine) {
+    fs.appendFile(fileName, writeLine, function (err) {
         if (err) throw err;
     });
 }
-
 
 //this will convert a date from the format it is currently in to the desired return format
 function convertDate(dateIn, dateFormatIn, dateFormatOut) {
     return convertedDate = moment(dateIn, dateFormatIn).format(dateFormatOut);
 };
 
-//will evaluate what was passed in.
+//will validate what was passed in, and optionally prompt the user if they passed in crap
 function processInput() {
     // If user didn't enter a command, or entered an invalid one, prompt for one
 
@@ -274,7 +257,7 @@ function processInput() {
                 choices: ["Spotify", "Bands in Town", "Movies", "Pick for me", "Quit"]
             },
             {
-                //only prompt for the search if one of the first three options
+                //only prompt for the search if one of the first three options selected
                 when: function (response) {
                     return (response.doingWhat !== "Pick for me" && response.doingWhat !== "Quit");
                 },
