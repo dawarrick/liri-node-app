@@ -27,8 +27,7 @@ if (process.argv[2] !== undefined) {
 var searchCriteria = process.argv.splice(3).join(" ");
 
 //separate screen displays
-var divider = "*--------------------------------------------------------------------------------------------------------*"
-
+var divider = `\r\n*--------------------------------------------------------------------------------------------------------*\r\n`
 
 //Spotify if spotify-this-song is passed.
 function spotifyCall() {
@@ -48,7 +47,8 @@ function spotifyCall() {
                     album: ea.album.name
                 });
             })
-            if (results.length < 0) {
+           
+            if (results.length === 0) {
                 noResults()
             }
             else {
@@ -57,7 +57,7 @@ function spotifyCall() {
             }
         })
         .catch(function (err) {
-            console.log(err);
+            noResults();
         });
 }
 
@@ -73,9 +73,8 @@ function concert() {
     }
     axios.get(`https://rest.bandsintown.com/artists/${searchCriteria}/events?app_id=codingbootcamp?date=upcoming`)
         .then(function (response) {
-            //console.log("response.data "+response.data);
-            response.data.forEach(function (ea) {
 
+            response.data.forEach(function (ea) {
                 results.push({
                     venue: ea.venue.name,
                     location: ea.venue.city + ', ' + ea.venue.region,
@@ -83,7 +82,7 @@ function concert() {
                 });
             })
 
-            if (results.length < 0) {
+            if (results.length === 0) {
                 noResults()
             }
             else {
@@ -91,24 +90,9 @@ function concert() {
                 writeToRandom();        //add to text file of commands
             }
         })
+        //error or no results
         .catch(function (error) {
-            console.log(error);
-            if (error.response) {
-                // The request was made and the server responded with a status code
-                // that falls out of the range of 2xx
-
-                console.log(error.response.data);
-                console.log(error.response.status);
-                console.log(error.response.headers);
-            } else if (error.request) {
-                // The request was made but no response was received
-                // `error.request` is an object that comes back with details pertaining to the error that occurred.
-                console.log(error.request);
-            } else {
-                // Something happened in setting up the request that triggered an Error
-                console.log("Error", error.message);
-            }
-            console.log(error.config);
+            noResults()
         });
 }
 
@@ -121,8 +105,8 @@ function movie() {
         searchCriteria = "Mr. Nobody";
     }
 
-    axios.get(`http://www.omdbapi.com/?t=${searchCriteria}&y=&plot=short&apikey=trilogy`).then(
-        function (response) {
+    axios.get(`http://www.omdbapi.com/?t=${searchCriteria}&y=&plot=short&apikey=trilogy`)
+        .then(function (response) {
 
             //rotten rating does not always exist
             var rottenRating1 = 'N/A';
@@ -130,6 +114,7 @@ function movie() {
                 rottenRating1 = response.data.Ratings[response.data.Ratings.findIndex(i => i.Source === "Rotten Tomatoes")].Value
             }
 
+            console.log("response title " + response.data.Title)
             results.push({
                 title: response.data.Title,
                 year: response.data.year,
@@ -140,20 +125,25 @@ function movie() {
                 plot: response.data.Plot,
                 actors: response.data.Actors
             });
-            if (results.length < 0) {
+            if (results.length === 0) {
+                console.log("no results")
                 noResults()
             }
             else {
                 printMovie();         //send to the console
                 writeToRandom();      //add to text file of commands
             }
-        }
-    );
-}
+        })
+        //error or no results
+        .catch(function (error) {
+            noResults();
+        });
+};
+
 
 //if the user want the program to select, will select a randomly from random.txt and call the process in the table
 function doRandom() {
- 
+
     // load an array of the values from previously select list (random.txt)
     // The code will store the contents of the reading inside the variable "data"
     fs.readFile("random.txt", "utf8", function (error, data) {
@@ -172,7 +162,7 @@ function doRandom() {
         if (i > 0 && i % 2 !== 0) {
             i--;
         }
-        
+
         command = newData[i];
         //need to get rid of the quotes on the search
         regex = /"/gi;
@@ -216,9 +206,7 @@ function printSpotify() {
         console.log("Album: " + results[i].album)
         console.log(divider)
     }
-    if (results.length < 0) {
-        noResults()
-    }
+
 }
 
 //print to screen the concerr 
@@ -249,16 +237,13 @@ function printMovie() {
         console.log("Actors: " + results[i].actors)
         console.log(divider)
     }
-    if (results.length < 0) {
-        noResults()
-    }
 
 }
 
 //if nothing was found that matches, let them know
 function noResults() {
     console.log(divider);
-    console.log("No criteria was found that matched your search " + searchCriteria)
+    console.log(`No criteria was found that matched your search "${searchCriteria}", please try again`)
     console.log(divider);
 }
 
@@ -289,7 +274,7 @@ function processInput() {
                 choices: ["Spotify", "Bands in Town", "Movies", "Pick for me", "Quit"]
             },
             {
-              //only prompt for the search if one of the first three options
+                //only prompt for the search if one of the first three options
                 when: function (response) {
                     return (response.doingWhat !== "Pick for me" && response.doingWhat !== "Quit");
                 },
@@ -300,8 +285,6 @@ function processInput() {
         ]).then(function (input) {
 
             searchCriteria = input.searchValue;
-            console.log("do what " + input.doingWhat)
-            console.log("searchCriteria " + input.searchCriteria)
 
             //get a random selection from those previously
             if (input.doingWhat === "Pick for me") {
@@ -331,7 +314,7 @@ function processInput() {
 }
 
 //once the input is validated, will process the command
-function processCommand() {   
+function processCommand() {
 
     //need to get a random command to execute
     if (command === 'do-what-it-says') {
@@ -351,4 +334,5 @@ function processCommand() {
     }
 }
 
+//read in what they entered from the command line and validate
 processInput();
