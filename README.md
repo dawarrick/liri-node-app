@@ -40,12 +40,12 @@ This will be used for future selection by the do-what-it-says option, allowing y
 
 **liri** uses the following nodejs libraries that you must install.
 
-inquirer - to allow for the prompts for the execution
-keys - API keys are stored in a .env file to protect them
-node-spotify-api - for calls to the Spotify API
-axios - for API calls to BandsinTown API and the OMDB API
-moment - for date conversion
-fs - for file I/O
+**inquirer** - to allow for the prompts for the execution.
+**keys** - API keys are stored in a .env file to protect them
+**node-spotify-api** - for calls to the Spotify API
+**axios** - for API calls to BandsinTown API and the OMDB API
+**moment** - for date conversion
+**fs** - for file I/O
 
 You must have valid Spotify credentials loaded into a .env file in order to run it.
 
