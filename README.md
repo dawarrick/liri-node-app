@@ -37,7 +37,7 @@ This will be used for future selection by the do-what-it-says option, allowing y
 
 ## Technical requirements
 
-###liri uses the following nodejs libraries that you must install.
+### liri uses the following nodejs libraries that you must install.
 
 **inquirer** - to allow for the prompts for the execution.  
 **keys** - API keys are stored in a .env file to protect them.  
