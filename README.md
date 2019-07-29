@@ -1,9 +1,9 @@
-# liri.js - Who needs Siri when you can have Liri!
+# Liri.js - Who needs Siri when you can have Liri?
 
 Developed by Deb Warrick https://debwarrick.com
 
 **Liri** 
-It is a Nodejs app that will allow you to retrieve information from the Spotify, BandsinTown, and OMDB APIs based on your user input.
+It is a Nodejs app that will allow you to retrieve information from the Spotify,BandsinTown,and OMDB APIs based on your user input.
 
 Liri can't be run from a URL, it must be executed using Nodejs.
 
@@ -11,10 +11,10 @@ Liri can't be run from a URL, it must be executed using Nodejs.
 
 You can enter one of the following commands after the node and program commands (node liri), followed by search criteria
 
-spotify-this-song *songname*        information about a selected song.  Will default to "The Sign" if no search criteria entered.
-concert-this      *bandname*        concert dates for the selected band.  Will default to "Maroon 5" if no search criteria entered.
-movie-this        *moviename*       information for selected movie title.  Will default to "Mr. Nobody" if no search criteria ented.
-do-what-it-says                     will select a random command and option from those that had previously been requested.  No search criteria is required.
+**spotify-this-song** *songname*   information about a selected song.  Will default to "The Sign" if no search criteria entered.
+**concert-this**      *bandname*   concert dates for the selected band.  Will default to "Maroon 5" if no search criteria entered.
+**movie-this**        *moviename*  information for selected movie title.  Will default to "Mr. Nobody" if no search criteria entered.
+**do-what-it-says**                will select a random command and option from those that had previously been requested.  No search criteria is required.
 
 ### Examples
 node liri spotify-this-song On the Road Again
@@ -27,9 +27,10 @@ node liri do-what-it-says
 
 #### All entries are case insensitive
 
-#### Can't remember the commands?  No Problem! 
+#### Can't remember the commands?  No problem, neither could I! 
 
 Node liri without any criteria will prompt you to select from a list.
+
 It will only prompt for the "selection criteria" if the command allows for that.
 
 #### Each time you successfully run the app, your entry will be added to the random selection list.
