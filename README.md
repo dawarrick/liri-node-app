@@ -7,12 +7,12 @@
 
 ## How it works
 
-You can enter one of the following commands after the node and program commands (node liri), followed by search criteria.  If not search criteria is entered, it will use the default value.
+You can enter one of the following commands after the node and program commands (node liri), followed by search criteria.  If no search criteria is entered, it will use the default value.
 
-**spotify-this-song** *songname*   information about a selected song.     Default "The Sign".
-**concert-this**      *bandname*   concert dates for the selected band.   Default "Maroon 5". 
-**movie-this**        *moviename*  information for selected movie title.  Default "Mr. Nobody".  
-**do-what-it-says**                will select a random command and search from those previously requested.  No search criteria.
+**spotify-this-song** *songname* &nbsp;&nbsp;&nbsp;information about a selected song.&nbsp;&nbsp;&nbsp; Default "The Sign".  
+**concert-this**      *bandname* &nbsp;&nbsp;&nbsp;concert dates for the selected band.&nbsp;&nbsp;&nbsp;Default "Maroon 5".   
+**movie-this**        *moviename*&nbsp;&nbsp;&nbsp;information for selected movie title.&nbsp;&nbsp;&nbsp;Default "Mr. Nobody".    
+**do-what-it-says**       &nbsp;&nbsp;&nbsp;will select a random command and search from those previously requested.  No search criteria.  
 
 ## Additional Features
 
@@ -30,7 +30,7 @@ This will be used for future selection by the do-what-it-says option, allowing y
 #### Want to see what you've run?
 The output from each selection is stored in log.txt for easy and future viewing.
 
-#### Examples
+#### Examples - each video below will show the command line with selection, and prompt with the default.
 
 ##### node liri spotify-this-song I love you just the way you are
 ![](spotify-this-song.gif)
@@ -44,7 +44,7 @@ The output from each selection is stored in log.txt for easy and future viewing.
 ##### node liri do-what-it-says  
 ![](do-what-it-says.gif)
 
-##### Log files
+##### Log files - random.txt stores the options run for use with the do-what-it-says option.  log.txt saves the output.
 ![](log-files.gif)
 
 ## Technical requirements
