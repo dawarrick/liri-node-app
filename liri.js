@@ -14,6 +14,7 @@ var spotify = new Spotify(keys.spotify);
 var results = [];   //will store the results from all three queries
 var command = "";   //action they wish to perform.
 var crlf = '\r\n';  //carriage return for file i/o new line
+var writeRandomLog = true;
 
 //these are the valid commands they can run
 var validCommand = ["concert-this", "spotify-this-song", "movie-this", "do-what-it-says"];
@@ -29,7 +30,7 @@ if (process.argv[2] !== undefined) {
 var searchCriteria = process.argv.splice(3).join(" ");
 
 //separate screen displays
-var divider = `${crlf}*--------------------------------------------------------------------------------------------------------*${crlf}`
+var divider = `${crlf}*--------------------------------------------------------------------------------------------------------*{crlf}`
 
 //Spotify if spotify-this-song is passed.
 function spotifyCall() {
@@ -42,13 +43,13 @@ function spotifyCall() {
     //going to limit it to 10 responses
     spotify.search({ type: 'track', query: searchCriteria, limit: 10 })
         .then(function (response) {
-           
+
             response.tracks.items.forEach(function (ea) {
                 var song = ea.name;
                 var preview = ea.preview_url;
                 var album = ea.album.name;
                 //need to pull out the artists as there can be multiple.
-                var allArtists = ""; 
+                var allArtists = "";
                 for (var i = 0; i < ea.artists.length; i++) {
                     if (allArtists !== "") {
                         allArtists = allArtists + ", ";
@@ -197,7 +198,7 @@ function getIndex(arrayLength) {
 function printResults() {
     //display the selection made
     console.log(`${crlf}******${command}: ${searchCriteria}******`);
-    var printString = `${crlf}******${command}: ${searchCriteria}******$`;
+    var printString = `${crlf}******${command}: ${searchCriteria}******`;
     //loop through the results
     for (var i = 0; i < results.length; i++) {
         console.log(divider);
@@ -226,9 +227,12 @@ function noResults() {
     writeToLog(`log.txt`, printString);
 }
 
-// Append the command and the searchCriteria of successful actions to random.txt
+//Append the command and the searchCriteria of successful actions to random.txt
 function writeToRandom() {
-    writeToLog(`random.txt`, `${command}, "${searchCriteria}"${crlf}`)
+    // Don't write if it was a do-what-it-says
+    if (writeRandomLog) {
+        writeToLog(`random.txt`, `${command}, "${searchCriteria}"${crlf}`)
+    }
 }
 
 // Append the screen output to the log.txt
@@ -302,6 +306,7 @@ function processCommand() {
     //need to get a random command to execute
     if (command === 'do-what-it-says') {
         doRandom();
+        writeRandomLog = false;
     }
     else if (command === "movie-this") {
         movie();
